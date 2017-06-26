@@ -1,11 +1,15 @@
 # ikr_python_client
-IKR is a digital witness tool for proving the existence of documents, data, valuable knowledge, intellectual properties (IP), and contents.
+The IKR is a digital witness tool evidencing the existence of documents, data, valuable knowledge, intellectual properties (IP), and contents.
+
+It combines digital fingerprints (SHA2 and SHA3) and a time stamp to earmark your document showing exactly the time of your submission and maintains this in a publically-available database for future legal purposes.
  
-It combines digital fingerprint (SHA2 and SHA3) and time stamp to earmark submission time of documents. This ensures that proper priority dates for acknowledging and memorializing IP:
-· The evolution of song composition; 
+This ensures that you have proper priority dates for acknowledging and memorializing:
+· The evolution of your song composition; 
 · Laboratory experiments and data prior to a patent application; 
 · The existence of the trade secret (without revealing its content),
-· Use of a technology for prior use purposes, etc.
+· Your use of a technology for prior use purposes, etc.
+
+The IKR offers the additional protection IP rights alone cannot protecting your ability to create (new music); earn money and/or receive recognition from your creations, inventions, etc.
  
 This is a Python server version that can be run as a cron job or at command line.  It runs under Python 2.x and 3.x.
 
