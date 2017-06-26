@@ -1,0 +1,17 @@
+{
+  "server_url": "https://ikr.iipcc.org",
+  "userid": ""username@domainname.com",
+  "password": "password",
+  "sqlitepath": "ikr_log.db",
+    "logpath": "client.log",
+    "directories": [
+      {
+        "type": "R",
+        "dirpath": "C:\\temp\\"
+      },
+      {
+        "type": "O",
+        "dirpath": "C:\\test\\"
+      }
+    ]
+}
