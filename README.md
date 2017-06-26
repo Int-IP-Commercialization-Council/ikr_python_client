@@ -18,7 +18,7 @@ Download ikr_client.py client_config.json and requirements_2x.txt (or requiremen
 Go to the directory and type the following commands to install the required Python modules:
 > 'pip install -r requirements_2x.txt'
 or
-'pip install -r requirements_3x.txt'
+>'pip install -r requirements_3x.txt'
 
 ## Running
 After updating client_config.json and installed the required Python modules.  You can now run ikr_client:
