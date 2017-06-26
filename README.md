@@ -16,10 +16,16 @@ In order to use IKR, you have to register first at https://ikr.iipcc.org.
 Download ikr_client.py client_config.json and requirements_2x.txt (or requirements_3x.txt depending on your Python version) to a directory.  Then edit client cileng_config.json with your user id, password, and directories that you need to generate the digital fingerprints.  The user id and password are the user id and password you registered with https://ikr.iipcc.org.
 
 Go to the directory and type the following commands to install the required Python modules:
-'''pip install -r requirements_2x.txt'''
+```
+pip install -r requirements_2x.txt
+```
 or
-'''pip install -r requirements_3x.txt'''
+```
+pip install -r requirements_3x.txt
+```
 
 ## Running
 After updating client_config.json and installed the required Python modules.  You can now run ikr_client:
-> python ik_client.py
+```
+python ik_client.py
+```
