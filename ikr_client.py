@@ -1,6 +1,6 @@
 #The MIT License
 #
-# Copyright (c) 2015-2017 International IP Commercialization Council, Inc. https://www.iipcc.org 
+# Copyright (c) 2015-2017 International IP Commercialization Council. https://www.iipcc.org 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
 #The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 #
@@ -41,7 +41,7 @@ TOKEN_REFRESH_URL = "%s/sync/api/v1.0/token/refresh" % config['server_url']
 PUSH_URL = '%s/sync/api/v1.0/data' % config['server_url']
 
 # SSL Verification DISABLED for DEBUG - self-signed cert
-SSL_VERIFY = False
+SSL_VERIFY = True
 
 # HTTP requests with 3 retries
 s = requests.Session()
@@ -108,13 +108,18 @@ def process_dir(dir, recursive_type):
       if ((recursive_type=="O" and dir_counter==0) or recursive_type=="R"):
          logger.info ("Processing the directory of "+root+" ...")
          for file in files:
-            file_name = os.path.join(root, file)
-            ret.append({
-            'filename': file_name,
-            'size': os.path.getsize(file_name),
-            'hash': get_file_hash(file_name),
-            'created_at': time.time(),
-            })
+            try:
+               file_name = os.path.join(root, file)
+               ret.append({
+               'filename': file_name,
+               'size': os.path.getsize(file_name),
+               'hash': get_file_hash(file_name),
+               'created_at': time.time(),
+               })
+            except IOError as e:
+               logger.error("I/O error({0}): {1}".format(e.errno, e.strerror)) 
+            except:
+               logger.error("Unexpected error:", sys.exc_info()[0])              
          send_to_server (ret)
          dir_counter = dir_counter + 1
       else:
@@ -252,21 +257,25 @@ def post_data(data, token):
 def get_token():
     # Get token and if not fresh do token refresh
     try:
-        response = s.get(TOKEN_URL,
+       response = s.get(TOKEN_URL,
                          auth=(config['userid'], config['password']),
                          verify=SSL_VERIFY)
+       # If all fine return token
+       #logger.info("get_token - return code %s", response.status_code)
+       if response.status_code == 200:
+           return response.json()['token']
+       elif response.status_code == 401:
+           logger.info("Incorrect userid and/or password.  No digital fingerprint is sent")
+           return refresh_token()
+       elif response.status_code==0:
+           logger.info("Unknown error")
+           return None
+       else:
+           logger.info("Unknown error")
+           return None                         
     except requests.exceptions.ConnectionError:
         logger.error('Error connecting to the server.')
         #sys.exit(1)
-
-    # If all fine return token
-    #logger.info("get_token - return code %s", response.status_code)
-    if response.status_code == 200:
-        return response.json()['token']
-    elif response.status_code == 401:
-        logger.info("Incorrect userid and/or password.  No digital fingerprint is sent")
-        return refresh_token()
-    else:
         return None
 
 
