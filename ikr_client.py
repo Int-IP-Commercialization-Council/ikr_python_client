@@ -1,7 +1,7 @@
 #The MIT License
 #
-# Copyright (c) 2015-2017 International IP Commercialization Council. https://www.iipcc.org 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
+# Copyright (c) 2015-2017 International IP Commercialization Council. https://www.iipcc.org
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 #The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 #
 #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -84,17 +84,17 @@ sql_conn.commit()
 
 
 def get_file_hash(file_name):
-   blocksize = 65536 
+   blocksize = 65536
    #generate SHA2-256 and SHA3-256
    sha2_256 = hashlib.sha256()
    sha3_256 = hashlib.sha3_256()
-   try:   
+   try:
       with open(file_name, 'rb') as f:
          for block in iter(lambda: f.read(blocksize), b''):
             sha2_256.update(block)
             sha3_256.update(block)
    except IOError as e:
-      logger.error("I/O error({0}): {1}".format(e.errno, e.strerror)) 
+      logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))
    except:
       logger.error("Unexpected error:", sys.exc_info()[0])
    return sha2_256.hexdigest()+sha3_256.hexdigest()#+blake2.hexdigest()
@@ -106,7 +106,7 @@ def process_dir(dir, recursive_type):
    dir_counter=0
    for root, dirs, files in os.walk(dir):
       if ((recursive_type=="O" and dir_counter==0) or recursive_type=="R"):
-         logger.info ("Processing the directory of "+root+" ...")
+         print ("Processing the directory of "+root+" ...")
          for file in files:
             try:
                file_name = os.path.join(root, file)
@@ -117,9 +117,16 @@ def process_dir(dir, recursive_type):
                'created_at': time.time(),
                })
             except IOError as e:
-               logger.error("I/O error({0}): {1}".format(e.errno, e.strerror)) 
+               logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))
+            except os.error as e:
+               logger.error("Cannot read file of "+file_name)
             except:
-               logger.error("Unexpected error:", sys.exc_info()[0])              
+               exc_type, exc_obj, exc_tb = sys.exc_info()
+               fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+               logger.error("Unexpected error:", str(sys.exc_info()[0]))
+               logger.info(exc_type)
+               logger.info(fname)
+               logger.info(exc_tb.tb_lineno)
          send_to_server (ret)
          dir_counter = dir_counter + 1
       else:
@@ -134,7 +141,7 @@ def compare_dicts(old_dict, new_dict):
 
     new_items = [x for x in new_dict if x['filename'] not in old_filenames]
 
-    old_indexed = {} 
+    old_indexed = {}
     for item in [x for x in old_dict if x['filename'] in new_filenames]:
         old_indexed[(item['filename'], item['hash'])] = item
 
@@ -157,17 +164,17 @@ def send_to_server (ret):
       for idx in range(0, int(max(lci, lni) / chunk_size) + 1):
          ni_chunk = new_items[idx * chunk_size:idx * chunk_size + chunk_size]
          ci_chunk = changed_items[idx * chunk_size:idx * chunk_size + chunk_size]
-         for k, v in enumerate (ni_chunk):       
+         for k, v in enumerate (ni_chunk):
             temp_chunk_filename=v["filename"]
             ni_chunk[k]["filename"]=ntpath.basename(temp_chunk_filename)
          for k, v in enumerate (ci_chunk):
             temp_chunk_filename=v["filename"]
-            ci_chunk[k]["filename"]=ntpath.basename(temp_chunk_filename)           
+            ci_chunk[k]["filename"]=ntpath.basename(temp_chunk_filename)
          data = {'new': ni_chunk, 'changed': ci_chunk}
-         
-         #inform user on the number of hashs sent        
+
+         #inform user on the number of hashs sent
          logger.info("Number of digital fingerprints to be sent: %s", (str(len(data['new'])) ))
-         
+
          token = get_token()
          if token:
             status_code = post_data(data=data, token=token)
@@ -237,6 +244,7 @@ def refresh_token():
 
 def post_data(data, token):
     # Post data to DB
+    return_code=0
     try:
         data_json_upload=json.dumps(data)
         zipped = zlib.compress(data_json_upload.encode("utf-8"))
@@ -247,11 +255,12 @@ def post_data(data, token):
                           headers={'Authorization': 'Bearer %s' % token},
                           json=json_upload,
                           verify=SSL_VERIFY)
+        return_code=response.status_code
+
     except requests.exceptions.ConnectionError:
         logger.error('Error connecting to the server.')
-
     #logger.info("post_data - return code %s", response.status_code)
-    return response.status_code
+    return return_code
 
 
 def get_token():
@@ -272,7 +281,7 @@ def get_token():
            return None
        else:
            logger.info("Unknown error")
-           return None                         
+           return None
     except requests.exceptions.ConnectionError:
         logger.error('Error connecting to the server.')
         #sys.exit(1)
