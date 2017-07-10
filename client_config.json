@@ -1,6 +1,6 @@
 {
   "server_url": "https://ikr.iipcc.org",
-  "userid": ""username@domainname.com",
+  "userid": "username@domainname.com",
   "password": "password",
   "sqlitepath": "ikr_log.db",
     "logpath": "client.log",
