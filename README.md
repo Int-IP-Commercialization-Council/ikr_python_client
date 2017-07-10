@@ -27,6 +27,7 @@ or
 ```
 pip install -r requirements_3x.txt
 ```
+Ensure the directory is writable as a SQLite database will be created by the script at the directory.
 
 ## Running
 After updating client_config.json and installed the required Python modules.  You can now run ikr_client:
