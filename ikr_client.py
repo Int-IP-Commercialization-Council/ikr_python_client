@@ -99,7 +99,7 @@ def get_file_hash(file_name):
       logger.error("Unexpected error:", sys.exc_info()[0])
    return sha2_256.hexdigest()+sha3_256.hexdigest()#+blake2.hexdigest()
 
-def process_dir(dir, recursive_type):
+def process_dir(dir, recursive_type, remark_str):
    # Process dir generating hashes
    global ret
    last_dir=""
@@ -114,6 +114,7 @@ def process_dir(dir, recursive_type):
                'filename': file_name,
                'size': os.path.getsize(file_name),
                'hash': get_file_hash(file_name),
+               'remark': remark_str,
                'created_at': time.time(),
                })
             except IOError as e:
@@ -202,7 +203,7 @@ def process_dirs():
    old_data = [dict(x) for x in cur.fetchall()]
    data = []
    for d in config['directories']:
-      data.extend(process_dir(d['dirpath'], d['type']))
+      data.extend(process_dir(d['dirpath'], d['type'], d['remark']))
 
 
 
